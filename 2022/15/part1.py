@@ -1,6 +1,6 @@
 import re
 
-f = open("2022/15/test", "r")
+f = open("2022/15/input", "r")
 input = f.read()
 
 
@@ -12,11 +12,12 @@ def parsepositions(input):
     return (sensors, beacons)
 
 
-def normalizepositions(sensors, beacons):
+def normalizepositions(sensors, beacons, row):
     minx, maxx, miny, maxy = findminmax(sensors + beacons)
     sensors = list(map(lambda s: (s[0] - minx, s[1] - miny), sensors))
     beacons = list(map(lambda s: (s[0] - minx, s[1] - miny), beacons))
-    return (sensors, beacons)
+    row -= miny
+    return (sensors, beacons, row)
 
 
 def findminmax(positions):
@@ -36,50 +37,52 @@ def distance(a, b):
 
 
 sensors, beacons = parsepositions(input)
-# print(sensors, beacons)
-sensors, beacons = normalizepositions(sensors, beacons)
-# print(sensors, beacons)
+row = 2000000
+sensors, beacons, row = normalizepositions(sensors, beacons, row)
 minx, maxx, miny, maxy = findminmax(sensors + beacons)
-# print(minx, maxx, miny, maxy)
-offset = 15
+offset = 1780271 # max distance for offset
 
-grid = [['.' for _ in range(minx, maxx + offset * 2 + 1)]
-        for _ in range(miny, maxy + offset * 2 + 1)]
+line = ['.' for _ in range(minx, maxx + offset * 2 + 1)]
 
 for sensor in sensors:
-    grid[sensor[1] + offset][sensor[0] + offset] = 'S'
+    if sensor[1] == row:
+        line[sensor[0] + offset] = 'S'
 
 for beacon in beacons:
-    grid[beacon[1] + offset][beacon[0] + offset] = 'B'
+    if beacon[1] == row:
+        line[beacon[0] + offset] = 'B'
 
-
-def drawarea(grid, center, d):
+def drawarea(line, center, d):
     starty = center[1] - d
     endy = center[1] + d
     for y in range(starty, center[1] + 1):
+        if y != row:
+            continue
         w = (y - starty) * 2 + 1
         whalf = int(w / 2)
         for x in range(center[0] - whalf, center[0] + whalf + 1):
-            if grid[y + offset][x + offset] == '.':
-                grid[y + offset][x + offset] = '#'
+            if line[x + offset] == '.':
+                line[x + offset] = '#'
     for y in range(center[1] + 1, endy + 1):
+        if y != row:
+            continue
         w = abs(y - endy) * 2
         whalf = int(w / 2)
         for x in range(center[0] - whalf, center[0] + whalf + 1):
-            if grid[y + offset][x + offset] == '.':
-                grid[y + offset][x + offset] = '#'
-    return grid
+            if line[x + offset] == '.':
+                line[x + offset] = '#'
+    return line
 
 
-printgrid(grid)
+# printgrid(grid)
 
 for i in range(len(sensors)):
     sensor = sensors[i]
     beacon = beacons[i]
     d = distance(sensor, beacon)
-    grid = drawarea(grid, sensor, d)
+    line = drawarea(line, sensor, d)
     # printgrid(grid)
 
-printgrid(grid)
-result = len(list(filter(lambda p: p == '#', grid[10 + offset])))
+# printgrid(grid)
+result = len(list(filter(lambda p: p == '#', line)))
 print(result)
