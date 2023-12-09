@@ -31,8 +31,23 @@ void Part1()
 
 void Part2()
 {
+    input = input.Select(l => l.Replace(" ", null)).ToArray();
+    var time = long.Parse(Regex.Match(input[0], @"\d+").Value);
+    var bestDistance = long.Parse(Regex.Match(input[1], @"\d+").Value);
+    var result = 1;
+    var wins = 0;
 
-    Console.WriteLine($"Part 2: ");
+    for (long i = 1; i < time - 1; i++)
+    {
+        var timeLeft = time - i;
+        var distance = i * timeLeft;
+        if (distance > bestDistance)
+            wins++;
+    }
+
+    result *= wins;
+
+    Console.WriteLine($"Part 2: {result}");
 }
 
 Part1();
